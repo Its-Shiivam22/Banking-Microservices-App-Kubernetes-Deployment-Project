@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     environment {
         DOCKERHUB_USER = "shiivam22"
         IMAGE_TAG = "v1-${BUILD_NUMBER}"
@@ -12,6 +16,8 @@ pipeline {
         GIT_USER_EMAIL = "jenkins@local"
 
         GITHUB_REPO = "Its-Shiivam22/Banking-App-Microservices-Kubernetes-Deployment-Project.git"
+
+        SKIP_CI = "false"
     }
 
     stages {
@@ -19,16 +25,34 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 checkout scm
+
+                script {
+                    def commitMessage = sh(
+                        script: "git log -1 --pretty=%B",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Latest commit message: ${commitMessage}"
+
+                    if (commitMessage.contains("[skip ci]")) {
+                        env.SKIP_CI = "true"
+                        currentBuild.description = "Skipped Jenkins self-triggered GitOps commit"
+                        echo "Skipping pipeline because commit message contains [skip ci]"
+                    }
+                }
             }
         }
 
         stage('Show Project Structure') {
+            when {
+                expression { env.SKIP_CI == "false" }
+            }
             steps {
                 sh '''
                 echo "Current workspace:"
                 pwd
 
-                echo "Repo root files:"
+                echo "Repository root files:"
                 ls -la
 
                 echo "Application folders:"
@@ -41,6 +65,9 @@ pipeline {
         }
 
         stage('Docker Login') {
+            when {
+                expression { env.SKIP_CI == "false" }
+            }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
@@ -55,6 +82,9 @@ pipeline {
         }
 
         stage('Build Docker Images') {
+            when {
+                expression { env.SKIP_CI == "false" }
+            }
             steps {
                 sh '''
                 docker build --no-cache -t $DOCKERHUB_USER/banking-frontend:$IMAGE_TAG "$APP_DIR/1.frontend"
@@ -71,6 +101,9 @@ pipeline {
         }
 
         stage('Push Docker Images') {
+            when {
+                expression { env.SKIP_CI == "false" }
+            }
             steps {
                 sh '''
                 docker push $DOCKERHUB_USER/banking-frontend:$IMAGE_TAG
@@ -87,9 +120,12 @@ pipeline {
         }
 
         stage('Update Kubernetes YAML Image Tags') {
+            when {
+                expression { env.SKIP_CI == "false" }
+            }
             steps {
                 sh '''
-                echo "Updating image tags in Kubernetes YAML files..."
+                echo "Updating Kubernetes YAML image tags to $IMAGE_TAG"
 
                 sed -i "s|image: $DOCKERHUB_USER/banking-frontend:.*|image: $DOCKERHUB_USER/banking-frontend:$IMAGE_TAG|g" "$K8S_DIR/5.frontend.yaml"
 
@@ -101,13 +137,16 @@ pipeline {
 
                 sed -i "s|image: $DOCKERHUB_USER/banking-notification-service:.*|image: $DOCKERHUB_USER/banking-notification-service:$IMAGE_TAG|g" "$K8S_DIR/9.notification-service.yaml"
 
-                echo "Updated image tags:"
+                echo "Updated image references:"
                 grep -R "image: $DOCKERHUB_USER" "$K8S_DIR"
                 '''
             }
         }
 
         stage('Commit Updated YAML to GitHub') {
+            when {
+                expression { env.SKIP_CI == "false" }
+            }
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'github-creds',
@@ -118,6 +157,8 @@ pipeline {
                     git config user.name "$GIT_USER_NAME"
                     git config user.email "$GIT_USER_EMAIL"
 
+                    git checkout -B main
+
                     git status
 
                     git add "$K8S_DIR/5.frontend.yaml"
@@ -126,7 +167,7 @@ pipeline {
                     git add "$K8S_DIR/8.transaction-service.yaml"
                     git add "$K8S_DIR/9.notification-service.yaml"
 
-                    git commit -m "Update banking app image tags to $IMAGE_TAG" || echo "No changes to commit"
+                    git commit -m "[skip ci] Update banking microservices image tags to $IMAGE_TAG" || echo "No YAML changes to commit"
 
                     git push https://$GIT_USERNAME:$GIT_TOKEN@github.com/$GITHUB_REPO HEAD:main
                     '''
@@ -135,12 +176,15 @@ pipeline {
         }
 
         stage('Argo CD Deployment Info') {
+            when {
+                expression { env.SKIP_CI == "false" }
+            }
             steps {
                 sh '''
-                echo "CI completed successfully."
+                echo "Jenkins CI completed successfully."
                 echo "Docker images pushed with tag: $IMAGE_TAG"
-                echo "Updated Kubernetes YAML files pushed to GitHub."
-                echo "Argo CD will now detect Git changes and sync them to Kubernetes."
+                echo "Kubernetes YAML files updated and pushed to GitHub."
+                echo "Argo CD will now detect the Git change and sync the app to Kubernetes."
                 '''
             }
         }
@@ -148,11 +192,17 @@ pipeline {
 
     post {
         success {
-            echo 'Jenkins CI completed. Argo CD will handle Kubernetes deployment.'
+            script {
+                if (env.SKIP_CI == "true") {
+                    echo "Pipeline skipped because this was a Jenkins GitOps commit with [skip ci]."
+                } else {
+                    echo "Jenkins CI completed successfully. Argo CD will handle deployment."
+                }
+            }
         }
 
         failure {
-            echo 'Pipeline failed. Check Jenkins console output.'
+            echo "Pipeline failed. Check Jenkins console output."
         }
 
         always {
