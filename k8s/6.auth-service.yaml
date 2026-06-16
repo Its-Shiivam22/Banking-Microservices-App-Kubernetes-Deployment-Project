@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: auth-service
-          image: shiivam22/banking-auth-service:v1-10
+          image: shiivam22/banking-auth-service:v1-11
           ports:
             - containerPort: 3001
           env:
