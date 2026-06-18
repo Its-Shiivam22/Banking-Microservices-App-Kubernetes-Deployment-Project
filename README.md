@@ -1,4 +1,4 @@
-# 🚀 Banking Microservices Kubernetes Deployment Project
+# 🚀 Banking Microservices Application Kubernetes Deployment Project
 
 ![AWS](https://img.shields.io/badge/Cloud-AWS-orange)
 ![Kubernetes](https://img.shields.io/badge/Orchestration-Kubernetes-blue)
