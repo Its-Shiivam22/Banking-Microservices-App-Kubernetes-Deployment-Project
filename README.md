@@ -106,7 +106,7 @@ Updated Application Runs on AWS kOps Kubernetes Cluster
 ## 📸 Architecture Diagram
 
 <p align="center">
-  <img src="./Screenshots/1.Architecture-Diagram.png" width="1000">
+  <img src="./screenshots/1.Architecture-Diagram.png" width="1000">
 </p>
 
 ```text
@@ -209,7 +209,7 @@ AWS Console → EC2 → Instances → Launch Instance
 ```
 
 <p align="center">
-  <img src="./Screenshots/2.EC2-Instance.png" width="1000">
+  <img src="./screenshots/2.EC2-Instance.png" width="1000">
 </p>
 
 
@@ -230,7 +230,7 @@ EC2 → Instance → Actions → Security → Modify IAM Role
 ```
 
 <p align="center">
-  <img src="./Screenshots/3.IAM-Role.png" width="1000">
+  <img src="./screenshots/3.IAM-Role.png" width="1000">
 </p>
 
 
