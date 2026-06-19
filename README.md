@@ -184,22 +184,60 @@ Banking-App-Microservices-Kubernetes-Deployment-Project/
 
 ---
 
-## 🔐 Demo Login Credentials
+# 📌 Part 1: kOps Kubernetes Cluster Setup on AWS EC2
+
+Before creating the Kubernetes cluster using kOps, an EC2 instance is launched as a management server.
+
+This EC2 instance is used to install and run the required DevOps tools such as:
 
 ```text
-Customer ID: SHIVAM001
-Password: demo123
+AWS CLI
+kubectl
+kOps
+Docker
+Git
 ```
 
-These credentials are inserted into the MySQL database through the initialization script present in:
+Note: The Kubernetes cluster is not created inside this EC2 instance.
+This EC2 instance is used only as a control machine to run kOps commands. kOps will create separate AWS resources such as control plane nodes, worker nodes, networking resources, and load balancers.
 
+Open EC2 Dashboard
+
+Open AWS Console and go to:
 ```text
-k8s/4.mysql.yaml
+AWS Console → EC2 → Instances → Launch Instance
 ```
 
----
+<p align="center">
+  <img src="./Screenshots/2.EC2-Instance.png" width="1000">
+</p>
 
-# 📌 Part 1: AWS kOps Kubernetes Cluster Setup
+
+Configure Instance Settings:
+Name: K8S
+Ami: Amazon Linux 2023
+Instance Type: c7i-flex.large
+VPC: Default VPC 
+Subnet: Public Subnet 
+Auto-assign Public IP: Enable
+Default Security Group
+Storage:
+Root - 20 GB Gp3
+
+Attached IAM Role to the Instance:
+```text
+EC2 → Instance → Actions → Security → Modify IAM Role
+```
+
+<p align="center">
+  <img src="./Screenshots/3.IAM-Role.png" width="1000">
+</p>
+
+
+For learning/demo purposes, attach:
+```AdministratorAccess```
+
+For production, use a least-privilege IAM policy instead of full administrator access.
 
 ## 🌐 Cluster Overview
 
