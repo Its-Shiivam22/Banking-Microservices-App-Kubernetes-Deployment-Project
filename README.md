@@ -1214,7 +1214,7 @@ curl -i http://bank.shivamekale.in/transactions/health
 curl -i http://bank.shivamekale.in/notifications/health
 ```
 <p align="center">
-  <img src="./screenshots/screenshots/49.Verify-Apis.png" width="1000">
+  <img src="./screenshots/49.Verify-Apis.png" width="1000">
 </p>
 
 ---
@@ -1226,7 +1226,7 @@ kubectl get all -n banking
 ```
 
 <p align="center">
-  <img src="./screenshots/screenshots/50.Verify.png" width="1000">
+  <img src="./screenshots/50.Verify.png" width="1000">
 </p>
 
 ---
