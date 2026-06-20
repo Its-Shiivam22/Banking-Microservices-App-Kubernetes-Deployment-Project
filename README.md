@@ -866,6 +866,10 @@ The actual Kubernetes deployment is handled by Argo CD using GitOps.
 | `dockerhub-creds` | Username with password | DockerHub login |
 | `github-creds` | Username with password | Push updated YAML files to GitHub |
 
+<p align="center">
+  <img src="./screenshots/31.Creds.png" width="1000">
+</p>
+
 ---
 
 ## 🔹 DockerHub Token
@@ -887,12 +891,12 @@ Repository Access: Only selected repository
 Contents: Read and write
 Metadata: Read-only
 ```
+<p align="center">
+  <img src="./screenshots/33.github-2.png" width="1000">
+</p>
 
 Use this token as the password for:
-
-```text
-github-creds
-```
+```github-creds```
 
 ---
 
@@ -905,37 +909,30 @@ http://YOUR-JENKINS-PUBLIC-IP:8080/github-webhook/
 ```
 
 Webhook settings:
+<br>
+```Content Type: application/json```
+<br>
+```Event: Just the push event```
 
-```text
-Content Type: application/json
-Event: Just the push event
-```
+<p align="center">
+  <img src="./screenshots/34.webhooks1.png" width="1000">
+</p>
+
 
 Enable in Jenkins job:
 
 ```text
 Build Triggers → GitHub hook trigger for GITScm polling
 ```
+<p align="center">
+  <img src="./screenshots/36.Git-SCM.png" width="1000">
+</p>
 
 To avoid a CI loop, Jenkins commits YAML changes with:
 
 ```text
 [skip ci]
 ```
-
-### Screenshot
-
-<p align="center">
-  <img src="./Screenshots/12.jenkins-credentials.png" width="1000">
-</p>
-
-<p align="center">
-  <img src="./Screenshots/13.github-webhook.png" width="1000">
-</p>
-
-<p align="center">
-  <img src="./Screenshots/14.jenkins-pipeline-success.png" width="1000">
-</p>
 
 ---
 
